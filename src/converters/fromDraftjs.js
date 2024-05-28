@@ -2,6 +2,7 @@
 // import draftToHtml from 'draftjs-to-html';
 // import {stateToHTML} from 'draft-js-export-html';
 // import { convertToHTML } from 'draft-convert';
+import jsdom from 'jsdom';
 import redraft from 'redraft';
 // import React from 'react';
 // import { connect } from 'react-redux';
@@ -9,27 +10,31 @@ import redraft from 'redraft';
 import pkg from 'lodash';
 const { isEmpty } = pkg;
 
+const { JSDOM } = jsdom;
+
+const dom = new JSDOM();
+const DOMParser = dom.window.DOMParser;
+const parser = new DOMParser();
+
 // import UniversalLink from '@plone/volto/components/manage/UniversalLink/UniversalLink';
 
 // from draft-js/utils/helpers
 // to render to a plain string we need to be sure all the arrays are joined after render
 const joinRecursively = (array) =>
-  array ?
-    array
-      .map((child) => {
-        if (Array.isArray(child)) {
-          return joinRecursively(child);
-        }
-        return child;
-      }).join('') : '';
+  array
+    ? array
+        .map((child) => {
+          if (Array.isArray(child)) {
+            return joinRecursively(child);
+          }
+          return child;
+        })
+        .join('')
+    : '';
 
 // https://www.npmjs.com/package/redraft
 const convertWithRedraft = (input) => {
-  const raw = redraft.default(
-    input,
-    renderers,
-    options,
-  );
+  const raw = redraft.default(input, renderers, options);
   const html = joinRecursively(raw);
   return html;
 };
@@ -61,16 +66,13 @@ const styles = {
   // },
 };
 
-
 const addBreaklinesInline = (children) => {
   if (typeof children[0] == 'string') {
     const s = children[0];
     if (s.split('\n').length > 1) {
       return s
         .split('\n')
-        .map((child, index) =>
-          child?.length > 0 ? `${child}<br />` : child
-        );
+        .map((child, index) => (child?.length > 0 ? `${child}<br />` : child));
     }
   }
   return joinRecursively(children);
@@ -80,16 +82,14 @@ const addBreaklinesInline = (children) => {
 const inline = {
   BOLD: (children, { key }) =>
     `<strong>${addBreaklinesInline(children)}</strong>`,
-  ITALIC: (children, { key }) =>
-    `<em>${addBreaklinesInline(children)}</em>`,
-  UNDERLINE: (children, { key }) =>
-    `<u>${addBreaklinesInline(children)}</u>`,
+  ITALIC: (children, { key }) => `<em>${addBreaklinesInline(children)}</em>`,
+  UNDERLINE: (children, { key }) => `<u>${addBreaklinesInline(children)}</u>`,
   CODE: (children, { key }) =>
     `<span style="${styles.code}">${addBreaklinesInline(children)}</u>`,
 
   // custom
   TEXT_LARGER: (children, { key }) =>
-    `<span class="draftjs-text-larger">${addBreaklinesInline(children)}</span>`,
+    `<span class="text-larger">${addBreaklinesInline(children)}</span>`,
 };
 
 // const addBreaklines = (children) =>
@@ -97,57 +97,102 @@ const inline = {
 //     return child[1].map((child) => [`${child}<br />`]);
 //   });
 
-// const splitBySoftLines = (children) =>
-//   children.map((child) => {
-//     return child.map((item) => {
-//       if (Array.isArray(item)) {
-//         return item[0].split('\n');
-//       }
-//       return item;
-//     });
-//   });
+const splitBySoftLines = (children) =>
+  children.map((child) => {
+    return child.map((item) => {
+      if (Array.isArray(item)) {
+        return item[0].split('\n');
+      }
+      return item;
+    });
+  });
 
 // // splitSoftLines for <li> tag
-// const splitSoftLinesOfLists = (children) =>
-//   children.map((child, index) => {
-//     return (
-//       <li key={index}>
-//         {child.map((subchild) => {
-//           if (Array.isArray(subchild)) {
-//             return subchild.map((subchildren) => {
-//               if (typeof subchildren === 'string') {
-//                 const last = subchildren.split('\n').length - 1;
-//                 return subchildren.split('\n').map((item, index) => (
-//                   <React.Fragment key={index}>
-//                     {item}
-//                     {index !== last && <br />}
-//                   </React.Fragment>
-//                 ));
-//               } else {
-//                 return subchildren;
-//               }
-//             });
-//           } else {
-//             return subchild;
-//           }
-//         })}
-//       </li>
-//     );
-//   });
+const splitSoftLinesOfLists = (children) =>
+  children
+    .map((child, index) => {
+      let html = `<li key=${index}>`;
+      child.forEach((subchild) => {
+        if (Array.isArray(subchild)) {
+          subchild.forEach((subchildren) => {
+            if (typeof subchildren === 'string') {
+              const last = subchildren.split('\n').length - 1;
+              html += subchildren.split('\n').map((item, index) => {
+                return item;
+              });
+            } else {
+              return subchildren;
+            }
+          });
+        } else {
+          html += subchild;
+        }
+      });
+      html += '</li>';
+      return html;
+      return `<li key=${index}>
+         {child.map((subchild) => {
+           if (Array.isArray(subchild)) {
+             return subchild.map((subchildren) => {
+               if (typeof subchildren === 'string') {
+                 const last = subchildren.split('\n').length - 1;
+                 return subchildren.split('\n').map((item, index) => (
+                   <React.Fragment key={index}>
+                     {item}
+                     {index !== last && <br />}
+                   </React.Fragment>
+                 ));
+               } else {
+                 return subchildren;
+               }
+             });
+           } else {
+             return subchild;
+           }
+         })}
+       </li>`;
+      // return (
+      //   <li key={index}>
+      //     {child.map((subchild) => {
+      //       if (Array.isArray(subchild)) {
+      //         return subchild.map((subchildren) => {
+      //           if (typeof subchildren === 'string') {
+      //             const last = subchildren.split('\n').length - 1;
+      //             return subchildren.split('\n').map((item, index) => (
+      //               <React.Fragment key={index}>
+      //                 {item}
+      //                 {index !== last && <br />}
+      //               </React.Fragment>
+      //             ));
+      //           } else {
+      //             return subchildren;
+      //           }
+      //         });
+      //       } else {
+      //         return subchild;
+      //       }
+      //     })}
+      //   </li>
+      // );
+    })
+    .join(' ');
 
 // // Returns how the default lists should be rendered
-// const getList =
-//   (ordered) =>
-//   (children, { depth, keys }) =>
-//     ordered ? (
-//       <ol key={keys[0]} keys={keys} depth={depth}>
-//         {splitSoftLinesOfLists(children)}
-//       </ol>
-//     ) : (
-//       <ul key={keys[0]} keys={keys} depth={depth}>
-//         {splitSoftLinesOfLists(children)}
-//       </ul>
-//     );
+const getList =
+  (ordered) =>
+  (children, { depth, keys }) => {
+    let liList = splitSoftLinesOfLists(children);
+    return ordered ? `<ol>${liList}</ol>` : `<ul>${liList}</ul>`;
+  };
+// ordered ? (
+//   <ol key={keys[0]} keys={keys} depth={depth}>
+//     {splitSoftLinesOfLists(children)}
+//   </ol>
+// ) : (
+//   <ul key={keys[0]} keys={keys} depth={depth}>
+//     {splitSoftLinesOfLists(children)}
+//   </ul>
+// );
 
 // // Special function to deal with list clones
 // /*const getSpecialList = type => (children, { depth, keys }) => (
@@ -176,11 +221,11 @@ const processChildren = (children, keys) => {
         return child.map((subchild, index) => {
           if (typeof subchild === 'string') {
             const last = subchild.split('\n').length - 1;
-            return subchild.split('\n').map((item, index) => (
-              `${item}${index !== last ? '<br />' : ''}`
-            ));
+            return subchild
+              .split('\n')
+              .map((item, index) => `${item}${index !== last ? '<br />' : ''}`);
           } else {
-            return (isEmpty(subchild)) ? '<br />' : subchild;
+            return isEmpty(subchild) ? '<br />' : subchild;
           }
         });
       } else {
@@ -188,8 +233,8 @@ const processChildren = (children, keys) => {
       }
     }),
   );
-  return processedChildren.map(
-    (chunk) => chunk ? `<p>${joinRecursively(chunk)}</p>` : ''
+  return processedChildren.map((chunk) =>
+    chunk ? `<p>${joinRecursively(chunk)}</p>` : '',
   );
 };
 
@@ -201,15 +246,13 @@ const blocks = {
     return processChildren(children, keys);
   },
   //   atomic: (children) => children[0],
-  //   blockquote: (children, { keys }) => (
-  //     <blockquote key={keys[0]}>
-  //       {addBreaklines(splitBySoftLines(children))}
-  //     </blockquote>
-  //   ),
-  'header-one': (children, { keys }) =>
+  blockquote: (children) =>
     children.map(
-      (child, i) => `<h1>${joinRecursively(child)}</h1>`,
+      (child, i) =>
+        `<blockquote class="blockquote">${joinRecursively(child)}</blockquote>`,
     ),
+  'header-one': (children, { keys }) =>
+    children.map((child, i) => `<h1>${joinRecursively(child)}</h1>`),
   'header-two': (children, { keys }) =>
     children.map(
       // (child, i) => `<h2 id=${keys[i]} key=${keys[i]}>${joinRecursively(child)}</h2>`,
@@ -217,28 +260,37 @@ const blocks = {
       (child) => `<h2>${joinRecursively(child)}</h2>`,
     ),
   'header-three': (children, { keys }) =>
-    children.map(
-      (child, i) => `<h3>${joinRecursively(child)}</h3>`,
-    ),
+    children.map((child, i) => `<h3>${joinRecursively(child)}</h3>`),
   'header-four': (children, { keys }) =>
-    children.map(
-      (child, i) => `<h4>${joinRecursively(child)}</h4>`,
-    ),
+    children.map((child, i) => `<h4>${joinRecursively(child)}</h4>`),
   'header-five': (children, { keys }) =>
-    children.map(
-      (child, i) => `<h5>${joinRecursively(child)}</h5>`,
-    ),
+    children.map((child, i) => `<h5>${joinRecursively(child)}</h5>`),
   'header-six': (children, { keys }) =>
-    children.map(
-      (child, i) => `<h6>${joinRecursively(child)}</h6>`,
-    ),
+    children.map((child, i) => `<h6>${joinRecursively(child)}</h6>`),
+  callout: (children, { keys }) =>
+    children.map((child, i) => `<q>${joinRecursively(child)}</q>`),
+  'callout-bg': (children, { keys }) =>
+    children.map((child, i) => `<q>${joinRecursively(child)}</q>`),
+  buttons: (children, { keys }) => {
+    let html = children[0].filter((x) => x !== undefined);
+    const tag = parser.parseFromString(html, 'text/html');
+
+    tag.body.childNodes.forEach((node) => {
+      if (node.getAttribute) {
+        let css_class = node.getAttribute('class') || '';
+        css_class += 'btn btn-primary inline-link';
+        node.setAttribute('class', css_class);
+      }
+    });
+    return `<p>${tag.body.innerHTML}</p>`;
+  },
   //   'code-block': (children, { keys }) => (
   //     <pre key={keys[0]} style={styles.codeBlock}>
   //       {addBreaklines(children)}
   //     </pre>
   //   ),
-  //   'unordered-list-item': getList(),
-  //   'ordered-list-item': getList(true),
+  'unordered-list-item': getList(),
+  'ordered-list-item': getList(true),
   //   callout: (children, { keys }) =>
   //     children.map((child, i) => (
   //       <p key={keys[i]} className="callout">
@@ -264,11 +316,11 @@ const blocks = {
 // });
 
 // const x = {
-//   '@type': 'slate', 
-//   'plaintext': 'Consulta la pagina dedicata per visualizzare la diretta streaming ', 
+//   '@type': 'slate',
+//   'plaintext': 'Consulta la pagina dedicata per visualizzare la diretta streaming ',
 //   'value': [
 //     {'children': [
-//       {'text': 'Consulta la pagina dedicata per visualizzare la diretta '}, 
+//       {'text': 'Consulta la pagina dedicata per visualizzare la diretta '},
 //       {'type': 'link', 'data': {'url': 'https://yioutube.com', 'dataElement': '', 'enhanced_link_infos': None}, 'children': [{'text': 'streaming'}]}, {'text': ' '}], 'type': 'p'}]}
 
 //   // [{'@type': 'text', 'text': {'blocks': [{'data': {}, 'depth': 0, 'entityRanges': [{'key': 0, 'length': 9, 'offset': 56}], 'inlineStyleRanges': [{'length': 9, 'offset': 56, 'style': 'BOLD'}], 'key': 'be3v4', 'text': 'Consulta la pagina dedicata per visualizzare la diretta streaming ', 'type': 'unstyled'}], 'entityMap': {'0': {'data': {'url': 'http://www.youtube.com/channel/UC9U01Wc_5BheD-TY2e9Pnlw'}, 'mutability': 'MUTABLE', 'type': 'LINK'}}}}]
@@ -320,9 +372,11 @@ const blocks = {
 //  ]
 
 const entities = {
-  LINK: (children, props, { key }) => (
-    `<a key="${key}" href="${props.url}" dataElement="${props.dataElelemnt || ''}">${joinRecursively(children)}</a>`
-  ),
+  LINK: (children, props, { key }) => {
+    return `<a key="${key}" href="${props.url}" data-element="${
+      props.dataElement || ''
+    }">${joinRecursively(children)}</a>`;
+  },
 
   //   IMAGE: (children, entity, { key }) => (
   //     <img key={key} src={entity.src} alt={entity.alt} />

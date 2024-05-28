@@ -1,5 +1,6 @@
 import { alignFromClassName, scaleFromUrl } from '../helpers/image.js';
 import { getYTVideoId } from '../helpers/video.js';
+import { slateTextBlock } from './slate.js';
 
 const imageBlock = (elem, href) => {
   // strip /@@images/image if present
@@ -95,13 +96,28 @@ const videoBlock = (elem) => {
   return block;
 };
 
+const calloutBlock = (elem) => {
+  const convertedChild = slateTextBlock(elem);
+  const block = {
+    '@type': 'callout_block',
+    style: 'base',
+    icon: 'it-info-circle',
+    title: '',
+    text: convertedChild.value,
+    color: 'default',
+  };
+  return block;
+};
+
 const elementsWithConverters = {
   IMG: imageBlock,
   VIDEO: videoBlock,
   IFRAME: iframeBlock,
+  Q: calloutBlock,
 };
 
 export {
+  calloutBlock,
   iframeBlock,
   imageBlock,
   videoBlock,

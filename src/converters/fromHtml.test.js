@@ -646,3 +646,270 @@ describe('convertFromHTML parsing nested tags', () => {
     expect(result[1]['@type']).toBe('slateTable');
   });
 });
+
+describe('convertFromHTML parsing quote', () => {
+  test('on its own', () => {
+    const html = '<q><strong>Callout text with bold</strong></q>';
+
+    const result = convertFromHTML(html, 'slate');
+    expect(result).toHaveLength(1);
+    expect(result).toEqual([
+      {
+        '@type': 'callout_block',
+        style: 'base',
+        icon: 'it-info-circle',
+        title: '',
+        text: [
+          {
+            children: [
+              {
+                text: 'Callout text with bold',
+              },
+            ],
+            type: 'strong',
+          },
+        ],
+        color: 'default',
+      },
+    ]);
+  });
+});
+
+describe('convertFromHTML create callout_block block from quote tag', () => {
+  test('on its own', () => {
+    const html = '<q><strong>Callout text with bold</strong></q>';
+
+    const result = convertFromHTML(html, 'slate');
+    expect(result).toHaveLength(1);
+    expect(result).toEqual([
+      {
+        '@type': 'callout_block',
+        style: 'base',
+        icon: 'it-info-circle',
+        title: '',
+        text: [
+          {
+            children: [
+              {
+                text: 'Callout text with bold',
+              },
+            ],
+            type: 'strong',
+          },
+        ],
+        color: 'default',
+      },
+    ]);
+  });
+});
+
+describe('convertFromHTML create slate block with proper css classes', () => {
+  test('on its own', () => {
+    const html =
+      '<p><a key="0" href="https://www.plone.org" dataelement="" class="btn btn-primary inline-link">xxx</a></p>';
+
+    const result = convertFromHTML(html, 'slate');
+    expect(result).toHaveLength(1);
+    expect(result).toEqual([
+      {
+        '@type': 'slate',
+        plaintext: 'xxx',
+        value: [
+          {
+            children: [
+              {
+                children: [
+                  {
+                    text: 'xxx',
+                  },
+                ],
+                data: {
+                  target: null,
+                  title: null,
+                  url: 'https://www.plone.org',
+                },
+                styleName: 'btn btn-primary inline-link',
+                type: 'link',
+              },
+            ],
+            type: 'p',
+          },
+        ],
+      },
+    ]);
+  });
+});
+
+describe('convertFromHTML create slate block with basic proper unordered list', () => {
+  test('on its own', () => {
+    const html = '<ul><li key=0>aaa</li><li key=1>bbb</li></ul>';
+
+    const result = convertFromHTML(html, 'slate');
+    expect(result).toHaveLength(1);
+    expect(result).toEqual([
+      {
+        '@type': 'slate',
+        plaintext: 'aaabbb',
+        value: [
+          {
+            children: [
+              {
+                children: [
+                  {
+                    text: 'aaa',
+                  },
+                ],
+                type: 'li',
+              },
+              {
+                children: [
+                  {
+                    text: 'bbb',
+                  },
+                ],
+                type: 'li',
+              },
+            ],
+            type: 'ul',
+          },
+        ],
+      },
+    ]);
+  });
+});
+
+describe('convertFromHTML create slate block with complex unordered list', () => {
+  test('on its own', () => {
+    const html =
+      '<ul><li key=0><strong>aaa</strong></li> <li key=1><a key="0" href="http://www.plone.org" data-element="">bbb</a></li></ul>';
+
+    const result = convertFromHTML(html, 'slate');
+    expect(result).toHaveLength(1);
+    expect(result).toEqual([
+      {
+        '@type': 'slate',
+        plaintext: 'aaa bbb',
+        value: [
+          {
+            children: [
+              {
+                children: [{ children: [{ text: 'aaa' }], type: 'strong' }],
+                type: 'li',
+              },
+              {
+                children: [
+                  {
+                    children: [{ text: 'bbb' }],
+                    data: {
+                      target: null,
+                      title: null,
+                      url: 'http://www.plone.org',
+                    },
+                    type: 'link',
+                  },
+                ],
+                type: 'li',
+              },
+            ],
+            type: 'ul',
+          },
+        ],
+      },
+    ]);
+  });
+});
+
+describe('convertFromHTML create slate block with basic proper ordered list', () => {
+  test('on its own', () => {
+    const html = '<ol><li key=0>aaa</li><li key=1>bbb</li></ol>';
+
+    const result = convertFromHTML(html, 'slate');
+    expect(result).toHaveLength(1);
+    expect(result).toEqual([
+      {
+        '@type': 'slate',
+        plaintext: 'aaabbb',
+        value: [
+          {
+            children: [
+              {
+                children: [
+                  {
+                    text: 'aaa',
+                  },
+                ],
+                type: 'li',
+              },
+              {
+                children: [
+                  {
+                    text: 'bbb',
+                  },
+                ],
+                type: 'li',
+              },
+            ],
+            type: 'ol',
+          },
+        ],
+      },
+    ]);
+  });
+});
+
+describe('convertFromHTML create slate block with complex ordered list', () => {
+  test('on its own', () => {
+    const html =
+      '<ol><li key=0><strong>aaa</strong></li> <li key=1><a key="0" href="http://www.plone.org" data-element="">bbb</a></li></ol>';
+
+    const result = convertFromHTML(html, 'slate');
+    expect(result).toHaveLength(1);
+    expect(result).toEqual([
+      {
+        '@type': 'slate',
+        plaintext: 'aaa bbb',
+        value: [
+          {
+            children: [
+              {
+                children: [{ children: [{ text: 'aaa' }], type: 'strong' }],
+                type: 'li',
+              },
+              {
+                children: [
+                  {
+                    children: [{ text: 'bbb' }],
+                    data: {
+                      target: null,
+                      title: null,
+                      url: 'http://www.plone.org',
+                    },
+                    type: 'link',
+                  },
+                ],
+                type: 'li',
+              },
+            ],
+            type: 'ol',
+          },
+        ],
+      },
+    ]);
+  });
+});
+
+describe('convertFromHTML create slate block with blockquote', () => {
+  test('on its own', () => {
+    const html = '<blockquote class="blockquote">text</blockquote>';
+
+    const result = convertFromHTML(html, 'slate');
+    expect(result).toHaveLength(1);
+    expect(result).toEqual([
+      {
+        '@type': 'slate',
+        plaintext: 'text',
+        value: [{ children: [{ text: 'text' }], type: 'blockquote' }],
+      },
+    ]);
+  });
+});

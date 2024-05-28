@@ -49,8 +49,11 @@ const simpleLinkDeserializer = (el) => {
       target: el.getAttribute('target'),
     },
   };
-
-  return jsx('element', attrs, children);
+  let block = jsx('element', attrs, children);
+  if (el.getAttribute('class')) {
+    block.styleName = el.getAttribute('class');
+  }
+  return block;
 };
 
 const bTagDeserializer = (el) => {
