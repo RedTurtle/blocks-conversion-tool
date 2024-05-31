@@ -130,8 +130,10 @@ describe('convertFromDraftJS parsing draftjs callout', () => {
   describe('with html converter', () => {
     const result = converFromDraftJS(draftjs);
 
-    test('will return a <q> tag', () => {
-      expect(result).toBe('<q><strong>Callout text with bold</strong></q>');
+    test('will return a <blockquote> tag', () => {
+      expect(result).toBe(
+        '<blockquote><p><strong>Callout text with bold</strong></p></blockquote>',
+      );
     });
   });
 });
@@ -448,3 +450,47 @@ describe('convertFromDraftJS parsing draftjs blockquote', () => {
     });
   });
 });
+
+// describe('prova', () => {
+//   const draftjs = {
+//     blocks: [
+//       {
+//         key: 'jrnb',
+//         text: 'Trasporto delle persone con difficoltà motorie ai seggi\nIl Comune di Cavriago, in collaborazione con l’Associazione “NOI CON VOI”, organizza il trasporto delle persone disabili mediante il pulmino adibito appositamente a tale servizio.\nIl servizio verrà effettuato nei seguenti orari:\nSABATO 8 GIUGNO dalle 15.00 alle 17.00\nDOMENICA 9 GIUGNO dalle 10.00 alle 12.00.\nIl trasporto dovrà essere prenotato direttamente all’associazione  al numero 333 5383663 (Ines).\n',
+//         type: 'callout',
+//         depth: 0,
+//         inlineStyleRanges: [
+//           {
+//             offset: 0,
+//             length: 56,
+//             style: 'BOLD',
+//           },
+//           {
+//             offset: 116,
+//             length: 13,
+//             style: 'BOLD',
+//           },
+//           {
+//             offset: 285,
+//             length: 81,
+//             style: 'BOLD',
+//           },
+//           {
+//             offset: 443,
+//             length: 11,
+//             style: 'BOLD',
+//           },
+//         ],
+//         entityRanges: [],
+//         data: {},
+//       },
+//     ],
+//     entityMap: {},
+//   };
+//   describe('with html converter', () => {
+//     const result = converFromDraftJS(draftjs);
+//     test('will return something', () => {
+//       expect(result).toBe('');
+//     });
+//   });
+// });

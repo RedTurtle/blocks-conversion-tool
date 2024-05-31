@@ -74,7 +74,7 @@ const blockFromElement = (el, defaultTextBlock, href) => {
     case 'IFRAME':
       raw = iframeBlock(el);
       break;
-    case 'Q':
+    case 'BLOCKQUOTE':
       raw = calloutBlock(el);
       break;
     default:

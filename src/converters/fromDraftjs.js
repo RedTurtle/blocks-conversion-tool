@@ -27,8 +27,9 @@ const joinRecursively = (array) =>
           if (Array.isArray(child)) {
             return joinRecursively(child);
           }
-          return child;
+          return child.replace('\n', '<br />');
         })
+        .filter((x) => x.length > 0)
         .join('')
     : '';
 
@@ -72,7 +73,9 @@ const addBreaklinesInline = (children) => {
     if (s.split('\n').length > 1) {
       return s
         .split('\n')
-        .map((child, index) => (child?.length > 0 ? `${child}<br />` : child));
+        .map((child, index) => (child?.length > 0 ? `${child}<br />` : child))
+        .filter((x) => x.length)
+        .join('');
     }
   }
   return joinRecursively(children);
@@ -268,9 +271,13 @@ const blocks = {
   'header-six': (children, { keys }) =>
     children.map((child, i) => `<h6>${joinRecursively(child)}</h6>`),
   callout: (children, { keys }) =>
-    children.map((child, i) => `<q>${joinRecursively(child)}</q>`),
+    children.map(
+      (child, i) => `<blockquote><p>${joinRecursively(child)}</p></blockquote>`,
+    ),
   'callout-bg': (children, { keys }) =>
-    children.map((child, i) => `<q>${joinRecursively(child)}</q>`),
+    children.map(
+      (child, i) => `<blockquote><p>${joinRecursively(child)}</p></blockquote>`,
+    ),
   buttons: (children, { keys }) => {
     let html = children[0].filter((x) => x !== undefined);
     const tag = parser.parseFromString(html, 'text/html');

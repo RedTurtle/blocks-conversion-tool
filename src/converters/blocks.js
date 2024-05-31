@@ -97,13 +97,20 @@ const videoBlock = (elem) => {
 };
 
 const calloutBlock = (elem) => {
-  const convertedChild = slateTextBlock(elem);
+  const convertedChild = slateTextBlock(elem).value[0].children;
+  let value = convertedChild.map((x) => {
+    if (!x.type) {
+      return { type: 'p', children: [x] };
+    }
+    return x;
+  });
+
   const block = {
     '@type': 'callout_block',
     style: 'base',
     icon: 'it-info-circle',
     title: '',
-    text: convertedChild.value,
+    text: value,
     color: 'default',
   };
   return block;

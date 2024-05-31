@@ -649,27 +649,33 @@ describe('convertFromHTML parsing nested tags', () => {
 
 describe('convertFromHTML parsing quote', () => {
   test('on its own', () => {
-    const html = '<q><strong>Callout text with bold</strong></q>';
+    const html =
+      '<blockquote><p><strong>Callout text with bold</strong></p></blockquote>';
 
     const result = convertFromHTML(html, 'slate');
     expect(result).toHaveLength(1);
     expect(result).toEqual([
       {
         '@type': 'callout_block',
-        style: 'base',
+        color: 'default',
         icon: 'it-info-circle',
-        title: '',
+        style: 'base',
         text: [
           {
             children: [
               {
-                text: 'Callout text with bold',
+                children: [
+                  {
+                    text: 'Callout text with bold',
+                  },
+                ],
+                type: 'strong',
               },
             ],
-            type: 'strong',
+            type: 'p',
           },
         ],
-        color: 'default',
+        title: '',
       },
     ]);
   });
@@ -677,7 +683,8 @@ describe('convertFromHTML parsing quote', () => {
 
 describe('convertFromHTML create callout_block block from quote tag', () => {
   test('on its own', () => {
-    const html = '<q><strong>Callout text with bold</strong></q>';
+    const html =
+      '<blockquote><strong>Callout text with bold</strong></blockquote>';
 
     const result = convertFromHTML(html, 'slate');
     expect(result).toHaveLength(1);
@@ -898,18 +905,60 @@ describe('convertFromHTML create slate block with complex ordered list', () => {
   });
 });
 
-describe('convertFromHTML create slate block with blockquote', () => {
+describe('convertFromHTML create callout_block', () => {
   test('on its own', () => {
-    const html = '<blockquote class="blockquote">text</blockquote>';
+    const html = '<blockquote class="blockquote"><p>text</p></blockquote>';
 
     const result = convertFromHTML(html, 'slate');
     expect(result).toHaveLength(1);
     expect(result).toEqual([
       {
-        '@type': 'slate',
-        plaintext: 'text',
-        value: [{ children: [{ text: 'text' }], type: 'blockquote' }],
+        '@type': 'callout_block',
+        color: 'default',
+        icon: 'it-info-circle',
+        style: 'base',
+        text: [
+          {
+            children: [
+              {
+                text: 'text',
+              },
+            ],
+            type: 'p',
+          },
+        ],
+        title: '',
       },
     ]);
   });
 });
+
+describe('convertFromHTML create slate block with blockquote simple', () => {
+  test('on its own', () => {
+    const html = '<blockquote>Testo</blockquote>';
+
+    const result = convertFromHTML(html, 'slate');
+    expect(result).toHaveLength(1);
+    expect(result).toEqual([
+      {
+        '@type': 'callout_block',
+        style: 'base',
+        icon: 'it-info-circle',
+        title: '',
+        text: [{ type: 'p', children: [{ text: 'Testo' }] }],
+        color: 'default',
+      },
+    ]);
+  });
+});
+
+// describe.only('prova', () => {
+//   test('on its own', () => {
+//     const html =
+//       '<blockquote><p><strong>Trasporto delle persone con difficoltà motorie ai seggi<br /></strong>Il Comune di Cavriago, in collaborazione con l’Associazione <strong>“NOI CON VOI”</strong>, organizza il trasporto delle persone disabili mediante il pulmino adibito appositamente a tale servizio. Il servizio verrà effettuato nei seguenti orari:<strong>SABATO 8 GIUGNO dalle 15.00 alle 17.00<br />,DOMENICA 9 GIUGNO dalle 10.00 alle 12.00.<br /></strong>Il trasporto dovrà essere prenotato direttamente all’associazione  al numero <strong>333 5383663</strong> (Ines).</p></blockquote>';
+
+//     const result = convertFromHTML(html, 'slate');
+//     expect(result).toHaveLength(1);
+//     expect(result).toEqual();
+//   });
+// });
