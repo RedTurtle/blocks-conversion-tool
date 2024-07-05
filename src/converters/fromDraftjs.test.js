@@ -455,37 +455,42 @@ describe('convertFromDraftJS parsing draftjs blockquote', () => {
 //   const draftjs = {
 //     blocks: [
 //       {
-//         key: 'jrnb',
-//         text: 'Trasporto delle persone con difficoltà motorie ai seggi\nIl Comune di Cavriago, in collaborazione con l’Associazione “NOI CON VOI”, organizza il trasporto delle persone disabili mediante il pulmino adibito appositamente a tale servizio.\nIl servizio verrà effettuato nei seguenti orari:\nSABATO 8 GIUGNO dalle 15.00 alle 17.00\nDOMENICA 9 GIUGNO dalle 10.00 alle 12.00.\nIl trasporto dovrà essere prenotato direttamente all’associazione  al numero 333 5383663 (Ines).\n',
-//         type: 'callout',
+//         data: {},
 //         depth: 0,
-//         inlineStyleRanges: [
+//         entityRanges: [
 //           {
-//             offset: 0,
-//             length: 56,
-//             style: 'BOLD',
-//           },
-//           {
-//             offset: 116,
-//             length: 13,
-//             style: 'BOLD',
-//           },
-//           {
-//             offset: 285,
-//             length: 81,
-//             style: 'BOLD',
-//           },
-//           {
-//             offset: 443,
-//             length: 11,
-//             style: 'BOLD',
+//             key: 0,
+//             length: 5,
+//             offset: 18,
 //           },
 //         ],
-//         entityRanges: [],
-//         data: {},
+//         inlineStyleRanges: [
+//           {
+//             length: 5,
+//             offset: 6,
+//             style: 'BOLD',
+//           },
+//           {
+//             length: 5,
+//             offset: 12,
+//             style: 'TEXT_LARGER',
+//           },
+//         ],
+//         key: 'i5b8',
+//         text: 'Testo testo testo testo ',
+//         type: 'unstyled',
 //       },
 //     ],
-//     entityMap: {},
+//     entityMap: {
+//       0: {
+//         data: {
+//           dataElement: '',
+//           url: 'http://www.google.it',
+//         },
+//         mutability: 'MUTABLE',
+//         type: 'LINK',
+//       },
+//     },
 //   };
 //   describe('with html converter', () => {
 //     const result = converFromDraftJS(draftjs);
