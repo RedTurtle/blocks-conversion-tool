@@ -279,17 +279,20 @@ const blocks = {
       (child, i) => `<blockquote><p>${joinRecursively(child)}</p></blockquote>`,
     ),
   buttons: (children, { keys }) => {
-    let html = children[0].filter((x) => x !== undefined);
-    const tag = parser.parseFromString(html, 'text/html');
+    const data = children.map((child, i) => {
+      let html = child.flat().filter((x) => x !== undefined);
+      const tag = parser.parseFromString(html.join(''), 'text/html');
 
-    tag.body.childNodes.forEach((node) => {
-      if (node.getAttribute) {
-        let css_class = node.getAttribute('class') || '';
-        css_class += 'btn btn-primary inline-link';
-        node.setAttribute('class', css_class);
-      }
+      tag.body.childNodes.forEach((node) => {
+        if (node.getAttribute) {
+          let css_class = node.getAttribute('class') || '';
+          css_class += 'btn btn-primary inline-link';
+          node.setAttribute('class', css_class);
+        }
+      });
+      return tag.body.innerHTML;
     });
-    return `<p>${tag.body.innerHTML}</p>`;
+    return `<p>${data.join('<br />')}</p>`;
   },
   //   'code-block': (children, { keys }) => (
   //     <pre key={keys[0]} style={styles.codeBlock}>
